@@ -1,95 +1,99 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import { useState } from "react";
+import useFetchPokemon from "./api/pokemon";
 
 export default function Home() {
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [offset, setOffset] = useState(0);
+  const limit = 10;
+  const { cardsData, loading, error } = useFetchPokemon(offset, limit);
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  const handleNextPage = () => {
+    setOffset(offset + limit);
+  };
+
+  const handlePrevPage = () => {
+    if (offset >= limit) {
+      setOffset(offset - limit);
+    }
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="flex flex-col h-screen bg-black ">
+      <div className=" m-2 flex flex-row justify-between">
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mr-2"
+          onClick={handlePrevPage}
+          disabled={offset === 0}
+        >
+          Prev
+        </button>
+        <h2 className="text-3xl font-bold mb-4 text-white">
+           Pokemon Cards 
+        </h2>
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+          onClick={handleNextPage}
+        >
+          Next
+        </button>
+      </div>
+
+      <div className="grid h-screen grid-cols-2 md:grid-cols-3 lg:grid-cols-5 justify-stretch gap-4 scroll-y-auto mb-2">
+        {cardsData.map((pokemon, index) => (
+          <div
+            key={pokemon.id}
+            className={`pokemon-card ${hoveredCard === index ? "hovered" : ""}`}
+            onMouseEnter={() => setHoveredCard(index)}
+            onMouseLeave={() => setHoveredCard(null)}
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+            <div className="card-inner">
+              <div className="card-front">
+                <h2 className="text-xl font-bold mb-2">{pokemon.name}</h2>
+                <img
+                  src={pokemon.imageUrl}
+                  alt={pokemon.name}
+                  className="mx-auto"
+                  style={{ width: "150px", height: "150px" }}
+                />
+                <h3 className="text-lg font-semibold mt-2 ">Abilities:</h3>
+                <ul className="list-disc ml-4">
+                  {pokemon.abilities.map((ability, index) => (
+                    <li key={index} className="text-sm">
+                      {ability}
+                    </li>
+                  ))}
+                </ul>
+                <h1>Height: {pokemon.height}</h1>
+              </div>
+              <div
+                className="card-back"
+                style={{
+                  backgroundImage: `url(${"https://tcg.pokemon.com/assets/img/expansions/sword-shield/header/header-medium-shield.jpg"})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                <img
+                  src={"https://cdn.worldvectorlogo.com/logos/pokemon-23.svg"}
+                  alt={"pokemon"}
+                  className="justify-center items-center mt-[280px]"
+                  style={{ width: "150px", height: "150px" }}
+                />
+                {/* Additional details or content for the back side of the card */}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
 }
