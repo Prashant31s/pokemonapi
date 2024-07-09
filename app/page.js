@@ -88,7 +88,7 @@ export default function Home() {
                   className="justify-center items-center mt-[280px]"
                   style={{ width: "150px", height: "150px" }}
                 />
-                {/* Additional details or content for the back side of the card */}
+                
               </div>
             </div>
           </div>
